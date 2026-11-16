@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+artifacts/
+.pytest_cache/
+scripts/.source-median-keys.json
+scripts/.e2e-keys.json
+__pycache__/
+*.pyc

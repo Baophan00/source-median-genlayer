@@ -1,0 +1,18 @@
+{
+  "name": "source-median",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One question, several sources: a consensus round reads every source, drops the broken ones, and the median is arithmetic.",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "python -m pytest tests/direct -q",
+    "deploy": "node scripts/deploy_studionet.js",
+    "e2e": "node scripts/e2e_studionet.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "genlayer-js": "1.1.8"
+  }
+}
