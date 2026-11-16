@@ -96,9 +96,20 @@ async function register_once(role, args) {
     console.log(`  ${id} is already registered; reusing it`);
     return null;
   } catch (error) {
-    if (!/no such query/i.test(String(error && error.message))) throw error;
+    if (RPC_HICCUP.test(String(error && error.message))) throw error;
+    console.log(`  ${id} is not registered yet`);
   }
-  return must(role, "register", args);
+  try {
+    return await must(role, "register", args);
+  } catch (error) {
+    try {
+      await view("get_query", [id]);
+      console.log(`  ${id} is already registered; reusing it`);
+      return null;
+    } catch (second) {
+      throw error;
+    }
+  }
 }
 
 const view = (fn, args) =>
