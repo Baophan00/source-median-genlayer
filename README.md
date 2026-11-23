@@ -58,6 +58,7 @@ Sorting first means one outrageous source moves the spread and nothing else. Thr
 ```
 contracts/source_median.py          the contract
 tests/direct/test_source_median.py  24 direct-mode tests in 4 classes
+tests/direct/test_method_signature.py  regression: self-first and return annotations
 scripts/deploy_studionet.js         deploy with genlayer-js, no CLI
 scripts/e2e_studionet.js            three live queries over the published pages
 app/index.html                      the station pages, indexed
@@ -67,8 +68,8 @@ app/demo/                           the five station pages the e2e run reads
 ## Live
 
 - Station pages: https://sourcemedian-genlayer.surge.sh/ ([A](https://sourcemedian-genlayer.surge.sh/demo/station-a.html) · [B](https://sourcemedian-genlayer.surge.sh/demo/station-b.html) · [C](https://sourcemedian-genlayer.surge.sh/demo/station-c.html) · [outlier](https://sourcemedian-genlayer.surge.sh/demo/station-outlier.html) · [offline](https://sourcemedian-genlayer.surge.sh/demo/station-broken.html))
-- Contract (Studio Network): `0x92650750A28935344E5d002D5EC93b03FC6bAfca`
-- Explorer: https://explorer-studio.genlayer.com/address/0x92650750A28935344E5d002D5EC93b03FC6bAfca
+- Contract (Studio Network): `0xbfd192f748a7a08A2c3d0524f02459083567c3CA`
+- Explorer: https://explorer-studio.genlayer.com/address/0xbfd192f748a7a08A2c3d0524f02459083567c3CA
 
 ## One live run on the live contract
 
@@ -79,13 +80,13 @@ linked in Live.
 
 | what | transaction |
 | --- | --- |
-| deploy `0x92650750A28935344E5d002D5EC93b03FC6bAfca` | `0x75476c4fb5209b17b95c4338c54bc8d0b2e81e77ea4d67eeb46ef27f1ca09688` |
-| `register("credits-1", …)` — A, B, C, min 3 | `0x4314d5f8be0c859680116de7d50acbe3da90bef39e92061d8bd5379ab36d185a` |
-| `read("credits-1")` — 42, 42, 42 | `0xbdfb9bd95ba225a09e11e39a1bf3946d728655071a8f98b79718f52ff80536bc` |
-| `register("credits-2", …)` — A, B, outlier, min 2 | `0xbc916644a56f81b762577c77e8597ef1e3742df9a1bb8c474d67bd0412f3bd83` |
-| `read("credits-2")` — 42, 42, 97 | `0xd4f0e96b26bd88710f2528c2d93f4236e944dcf892713891facb64a287bb0c1b` |
-| `register("credits-3", …)` — A, B, offline, min 3 | `0x506b502d084870b53ac1e4acf7342f64b0efe3c2462f0b8734a7de1523f66d88` |
-| `read("credits-3")` — refused, nothing stored | `0x32c736e922f6acfe24f33e234e381aa74945de6a5d8137b461ac483d896dd39a` |
+| deploy `0xbfd192f748a7a08A2c3d0524f02459083567c3CA` | `0xe26f28faaf2589d38f760a2fb92466684d03fb29faa496afd7cf239eb3444695` |
+| `register("credits-1", …)` — A, B, C, min 3 | `0xd9827053d35d2fe7ff5c98c93191d2587af7fa912264af62e2c1669e40e78bb2` |
+| `read("credits-1")` — 42, 42, 42 | `0x3c7f5f0cc18fe6e02fee20a3e30bddda75e0609f1cd9dfafb0e5b048256c96c6` |
+| `register("credits-2", …)` — A, B, outlier, min 2 | `0x621fa79f15deebd7277d112de2761fbbfa131f2a4fe77d224d22d5d5c070f51a` |
+| `read("credits-2")` — 42, 42, 97 | `0xe05cfd22a1d0913fcc5e98e72ad9358c982703f79af938335214c8945c356349` |
+| `register("credits-3", …)` — A, B, offline, min 3 | `0x7bee44475837d0a97c8b358d643637e133aaa74cbebb6dbc4e425fd7ecbb5eff` |
+| `read("credits-3")` — refused, nothing stored | `0xf5f3cc5cd09fc64b7ad51e9a5c14c6d341d3a1d74846dcba0b4456b3e1ce59d1` |
 
 What the contract stored:
 
@@ -108,7 +109,7 @@ env -u PYTHONPATH -u VIRTUAL_ENV -u PYTHONHOME uv run --python 3.13 \
   --with pytest --with genlayer-test pytest tests/direct -q
 ```
 
-24 direct-mode tests in 4 classes. The pages and the model are mocked; the
+25 direct-mode tests in 4 classes plus one AST regression test. The pages and the model are mocked; the
 contract is not. They cover registering a query and reading it back, a duplicate
 id, one and nine sources, a malformed URL, a source listed twice, the tolerance,
 maximum and minimum ranges, the question and unit lengths, three agreeing sources,

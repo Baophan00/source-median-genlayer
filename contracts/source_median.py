@@ -40,6 +40,7 @@ reader decides what the spread is worth.
 import json
 import datetime as _dt
 from dataclasses import dataclass
+from typing import Optional
 from genlayer import *
 
 MIN_SOURCES = 2
@@ -112,12 +113,10 @@ class SourceMedian(gl.Contract):
     def _sender(self) -> str:
         return str(gl.message.sender_address).lower()
 
-    @staticmethod
-    def _canonical(value) -> str:
+    def _canonical(self, value) -> str:
         return json.dumps(value, sort_keys=True, separators=(",", ":"))
 
-    @staticmethod
-    def _now() -> int:
+    def _now(self) -> int:
         return int(_dt.datetime.now(_dt.timezone.utc).timestamp())
 
     def _sources(self, query: Query) -> list:
@@ -151,8 +150,7 @@ class SourceMedian(gl.Contract):
 
     # ------------------------------------------------------------------- round
 
-    @staticmethod
-    def _parse_value(raw, max_value: int):
+    def _parse_value(self, raw, max_value: int) -> Optional[int]:
         """One source's number, or None when the source said nothing usable."""
         if isinstance(raw, str):
             try:
@@ -180,8 +178,7 @@ class SourceMedian(gl.Contract):
             return None
         return value
 
-    @staticmethod
-    def _read_source(url: str, question: str, unit: str, max_value: int):
+    def _read_source(self, url: str, question: str, unit: str, max_value: int) -> Optional[int]:
         """Fetch one source and ask the model for its number. None if unusable."""
         try:
             page = gl.nondet.web.render(url, mode="text")
@@ -212,10 +209,9 @@ class SourceMedian(gl.Contract):
             raw = gl.nondet.exec_prompt(prompt, response_format="json")
         except Exception:
             return None
-        return SourceMedian._parse_value(raw, max_value)
+        return self._parse_value(raw, max_value)
 
-    @staticmethod
-    def _read_query(query: Query) -> dict:
+    def _read_query(self, query: Query) -> dict:
         """One consensus round: read every source, then take the median in code."""
 
         sources = json.loads(query.sources_json)
@@ -228,7 +224,7 @@ class SourceMedian(gl.Contract):
         def ask() -> str:
             values = []
             for url in sources:
-                value = SourceMedian._read_source(url, question, unit, max_value)
+                value = self._read_source(url, question, unit, max_value)
                 if value is not None:
                     values.append(value)
             if len(values) < min_sources:
@@ -247,7 +243,7 @@ class SourceMedian(gl.Contract):
                 reliable = spread == 0
             else:
                 reliable = spread * 100 <= tolerance * median
-            return SourceMedian._canonical(
+            return self._canonical(
                 {"values": values, "median": median, "spread": spread, "reliable": reliable}
             )
 
@@ -261,10 +257,9 @@ class SourceMedian(gl.Contract):
                 "disagree."
             ),
         )
-        return SourceMedian._parse_answer(answer, tolerance)
+        return self._parse_answer(answer, tolerance)
 
-    @staticmethod
-    def _parse_answer(answer, tolerance: int) -> dict:
+    def _parse_answer(self, answer, tolerance: int) -> dict:
         if isinstance(answer, str):
             try:
                 answer = json.loads(answer)
@@ -360,7 +355,7 @@ class SourceMedian(gl.Contract):
         if not _is_id(query_id):
             raise gl.vm.UserError(f"a query id is 1 to {MAX_ID} characters")
         query = self._load(query_id.strip())
-        reading = SourceMedian._read_query(query)
+        reading = self._read_query(query)
 
         rows = self.readings.get_or_insert_default(query.query_id)
         round_no = int(query.latest_round) + 1
@@ -425,7 +420,7 @@ class SourceMedian(gl.Contract):
         return self._query_dict(self._load(query_id.strip()))
 
     @gl.public.view
-    def latest(self, query_id: str):
+    def latest(self, query_id: str) -> Optional[dict]:
         if not _is_id(query_id):
             raise gl.vm.UserError(f"a query id is 1 to {MAX_ID} characters")
         query = self._load(query_id.strip())
